@@ -11,7 +11,7 @@ https://docs.google.com/document/d/1l-tcXkaM9hbKzKwgyy6ejOuuMtdKp-De8IrZfMHRVCM/
 ---------------------- NODE START -------------------------------------------------------<br />
 1.  ./node-start.sh<br />
 
->> To attach running tmux session: tmux attach -t 0 <br />
+> To attach running tmux session: tmux attach -t 0 <br />
 >> To detach running tmux session: press CTRL + b, then release both keys and press d<br />
 >> To exit the node once inside tmux session: type "exit" and enter<br />
 
