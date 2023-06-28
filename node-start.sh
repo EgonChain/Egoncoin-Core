@@ -6,7 +6,7 @@ RED='\033[0;31m'
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 CHAINID=271
-BOOTNODE="enr:-KO4QGl7a66W33H8OWaXf8x5PozmqNmq2h_m54nzAOvz7IrBC76dXuDIpfKRtXBsEc9plN5Akn-npVIGm8dqG6zbbmaGAYjJpccMg2V0aMfGhCTk9KiAgmlkgnY0gmlwhJ9ZaBmJc2VjcDI1NmsxoQLC89St0j332GYrdzXrg7dZe_wjDc61Lt6vB_lbPeOXN4RzbmFwwIN0Y3CCf5yDdWRwgn-c"
+BOOTNODE="enr:-KO4QIHbnaFqynfKyahm6gFJgv6H5IeMN1Mpjlslez5ZH30WO7jg2d3QQcbDryUkUmJVQWOLi20OuVOLZnsCvg0WBIaGAYj2nuoCg2V0aMfGhJWbL-OAgmlkgnY0gmlwhJ9ZaBmJc2VjcDI1NmsxoQJjuhSKk2g_JmHfi6co-0QCeSRMjRQEKzCWn1s7_K7LtIRzbmFwwIN0Y3CCf5yDdWRwgn-c"
 
 echo -e "${GREEN}**********************************************************************"
 echo -e "Starting node"
