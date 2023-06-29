@@ -31,10 +31,7 @@ echo "Total nodes to be created: $totalNodes"
 
 echo -e "${GREEN}\t\t\t_________________________________________________________________________________________________________________${NC}\n"
 
-echo -e "${RED}\t\t\t\t\t\t Blockchain setup script | Published under GPL-3.0-only"
-
-echo -e "${GREEN}\t\t\t\t\t\t maintainer @hide001 | Designed for @EtherAuthority Egon Chain${NC}"
-
+echo -e "${RED}\t\t\t\t\t\t Egon Mainnet Node Setup"
 # getting os info
 echo -e "\t\t\t\t\t\t\tTarget OS: Ubuntu 20.04 LTS (Focal Fossa)"
 echo -e "\t\t\t\t\t\t\tYour OS: $(. /etc/os-release && printf '%s\n' "${PRETTY_NAME}")"
@@ -92,7 +89,7 @@ done
 tree ./chaindata
 
 echo -e "\n\n${ORANGE}TASK: ${GREEN}[getting password for account]${NC}\n"
-echo -e "\n\n${ORANGE}This step is very important. Input a password that will be used for a newly created validator account. In next step you will recieve a public key for your validator account"
+echo -e "\n${ORANGE}This step is very important. Input a password that will be used for a newly created validator account. In next step you will recieve a public key for your validator account"
 echo -e "${ORANGE}Once a validator account is created using your given password, I'll give you where the keystore file is located so you can import it in metamask\n\n${NC}"
 
 
