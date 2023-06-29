@@ -19,6 +19,6 @@ echo -e "Starting node"
         tmux send-keys -t 0 "./node_src/build/bin/geth --datadir ./chaindata/node1 --networkid $CHAINID --bootnodes $BOOTNODE --mine --unlock 0 --password ./chaindata/node1/pass.txt --syncmode=full console" Enter
     fi
 
-echo -e "${ORANGE}Node started\nEnter tmux attach -t 0 to see node in action${NC}"
-echo -e "\n\n\n${ORANGE}Now give your tmux-geth instance sometime to sync till the recent block. Once it's done you can go to staking page and activate your validator by staking"
-echo -e "\n\n${ORANGE}Remember to import the account's key store file into you metmask for staking.${NC}"
+echo -e "${GREEN}Node started\nEnter tmux attach -t 0 to see node in action"
+echo -e "\nIt's recommended to wait until tmux-geth instance has symced to the latest block. Once it's done you can go to staking page and activate your validator by staking"
+echo -e "\nRemember to import the account's key store file into you metmask for staking.${NC}"
