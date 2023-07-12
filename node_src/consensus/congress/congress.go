@@ -676,7 +676,8 @@ func (c *Congress) Finalize(chain consensus.ChainHeaderReader, header *types.Hea
 
 	    	
 		if err := c.trySendBlockReward(chain, header, state,addr,gass); err != nil {
-			panic(err)
+			//panic(err)
+			log.Info(err.Error())
 		}
 	}
 
@@ -807,14 +808,17 @@ func (c *Congress) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 	    log.Info("REQUIRED GAS INFO FOR TEST >> " + string(out1))
 		
 		if err := c.trySendBlockReward(chain, header, state,addr,gass); err != nil {
-			panic(err)
+			//panic(err)
+			log.Info(err.Error())
+
 		}
 	}
 
 	// do epoch thing at the end, because it will update active validators
 	if header.Number.Uint64()%c.config.Epoch == 0 {
 		if _, err := c.doSomethingAtEpoch(chain, header, state); err != nil {
-			panic(err)
+			//panic(err)
+			log.Info(err.Error())
 		}
 	}
 
@@ -914,7 +918,7 @@ func logblock() {
         panic(err)
     }
 
-    log.Info("CCCHHHANDAN......." + header.Number.String()) // 5671744
+    log.Info("Block Logger >>>" + header.Number.String()) // 5671744
 
     /*blockNumber := big.NewInt(5671744)
     block, err := client.BlockByNumber(context.Background(), blockNumber)
