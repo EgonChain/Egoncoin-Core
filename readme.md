@@ -1,4 +1,4 @@
-This package is developed for Egon Chain and must be used strictly for only Egon Mainnet. You are required to follow the instruction given as it is. If a problem occurs please get in touch with the developer.<br />
+This package is developed for Egon Chain and must be used strictly for only Egon Mainnet. You are required to follow the instruction given as it is. If a problem occurs please raise an issue here<br />
 This directory contains node source code, node setup, and startup script. <br /><br />
 
 In order to become a validator in Egon Mainnet you first need to set up and start the node:<br /><br />
