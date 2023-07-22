@@ -32,11 +32,11 @@ To back the Egon blockchain you can become a validator. Full flow to become a va
   scp -r root@<server_ip>:/root/EgonCoin-Core/chaindata/node1/keystore
   scp root@<server_ip>:/root/EgonCoin-Core/chaindata/node1/pass.txt
 ```
-* On your server, start the node that you just installed **(See Usage/Example)**
-* Once the node is started and confirmation is seen on your terminal, open the interactive console by attaching tmux session **(See Usage/Example)**
+* On your server, start the node that you just installed **([See Usage/Example](#usageexamples))**
+* Once the node is started and confirmation is seen on your terminal, open the interactive console by attaching tmux session **([See Usage/Example](#usageexamples))**
 * Once inside the interactive console, you'll see "TRANSACTION OBJECT IMPORT" and "age=<some period like 6d5hr or 5mon 3weeks>". You need to wait until the "unauthorized validator" warning starts to pop up on the console. 
 * Once "unauthorized validators" warning shows up, go to https://staking.egonscan.com and click "Become a validator". Fill in all the details in the form, in the "Fee address" field enter the validator wallet address that you imported into your metamask. Proceed further
-* Once the last step is done, you'll see a "Signed Potential Block" message on the interactive console. You'll also see your validator wallet as a validator on the staking page and on explorer. You should also detach from the console after the whole process is done **(See Usage/Example)**
+* Once the last step is done, you'll see a "Signed Potential Block" message on the interactive console. You'll also see your validator wallet as a validator on the staking page and on explorer. You should also detach from the console after the whole process is done **([See Usage/Example](#usageexamples))**
 ## Installation
 
 **You must ensure that:** 
