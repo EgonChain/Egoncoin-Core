@@ -26,7 +26,7 @@ We acknowledge and actively contribute to decentralization causes and derivative
 
 ## How to become a validator
 To back the Egon blockchain you can become a validator. Full flow to become a validator, you must:
-* Install this package **(See Installation)**
+* Install this package **([See Installation](#installation))**
 * Download your newly created validator wallet from your server and import it in your metamask or preferred wallet. Fund this account with the appropriate EGC needed to become a validator. Example command to download the wallet on your local PC:
 ```bash
   scp -r root@<server_ip>:/root/EgonCoin-Core/chaindata/node1/keystore
