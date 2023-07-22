@@ -69,6 +69,10 @@ After you run node-setup, follow the on-screen instructions carefully and you'll
     
 ## Usage/Examples
 
+Display help
+```bash
+./node-setup.sh --help
+```
 To create/install a validator node. Fresh first-time install
 ```bash
 ./node-setup.sh --validator 1
