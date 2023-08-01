@@ -89,8 +89,3 @@ To exit/detach from an interactive console
 ```text
 Press CTRL & b , release both keys, and press d
 ```
-
-
-## Authors
-
-- [swaraj @hide001](https://www.github.com/hide001)
