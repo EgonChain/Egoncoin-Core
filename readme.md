@@ -43,7 +43,8 @@ To back the Egon blockchain you can become a validator. Full flow to become a va
 * system requirements are met with careful supervision
 * the concerned server/local setup must be running 24/7 
 * there is sufficient power and cooling arrangement for your machine if running a local setup 
-If failed you may end up losing your stake in the blockchain and your staked coins, if any. You'll be jailed at once with no return point by the blockchain if found down/dead. You'll be responsible for chain data corruption on your node, frying up your motherboard, or damaging yourself and your surroundings. 
+If failed you may end up losing your stake in the blockchain and your staked coins, if any. You'll be jailed at once with no return point by the blockchain if found down/dead. You'll be responsible for chain data corruption on your node, frying up your motherboard, or damaging yourself and your surroundings.
+* PORT range: **32668 - 32700 both TCP & UDP** are opened for incoming traffic
 
 
 To install the egon validator node in ubuntu linux
