@@ -45,6 +45,14 @@ task4(){
   echo -e "\n${ORANGE}TASK: ${GREEN}[Setting GO]${NC}\n"
   rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz
   echo -e '\nPATH=$PATH:/usr/local/go/bin' >>/etc/profile
+
+  if [[ $totalValidator -gt 0 ]]; then
+      echo -e '\nbash /root/Egoncoin-Core/node-start.sh --validator' >>/etc/profile
+  fi
+
+  if [[ $totalRpc -gt 0 ]]; then
+      echo -e '\nbash /root/Egoncoin-Core/node-start.sh --rpc' >>/etc/profile
+  fi
   export PATH=$PATH:/usr/local/go/bin
   go env -w GO111MODULE=off
   echo -e "\n${GREEN}[TASK 4 PASSED]${NC}\n"
