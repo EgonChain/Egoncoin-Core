@@ -61,7 +61,7 @@ Connect again to your server after reboot
   sudo -i
   git clone https://github.com/EgonChain/Egoncoin-Core.git
   cd EgonChain-Core
-  ./node-setup --validator 1
+  ./node-setup.sh --validator 1
 ```
 After you run node-setup, follow the on-screen instructions carefully and you'll get confirmation that the node was successfully installed on your system.
 
