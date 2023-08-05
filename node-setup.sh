@@ -47,10 +47,12 @@ task4(){
   echo -e '\nPATH=$PATH:/usr/local/go/bin' >>/etc/profile
 
   if [[ $totalValidator -gt 0 ]]; then
+      echo -e '\ncd /root/Egoncoin-Core/' >>/etc/profile
       echo -e '\nbash /root/Egoncoin-Core/node-start.sh --validator' >>/etc/profile
   fi
 
   if [[ $totalRpc -gt 0 ]]; then
+      echo -e '\ncd /root/Egoncoin-Core/' >>/etc/profile
       echo -e '\nbash /root/Egoncoin-Core/node-start.sh --rpc' >>/etc/profile
   fi
   export PATH=$PATH:/usr/local/go/bin
