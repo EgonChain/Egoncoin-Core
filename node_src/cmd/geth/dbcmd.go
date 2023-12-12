@@ -557,6 +557,7 @@ func importLDBdata(ctx *cli.Context) error {
 		close(stop)
 	}()
 	db := utils.MakeChainDatabase(ctx, stack, false)
+	defer db.Close()
 	return utils.ImportLDBData(db, fName, int64(start), stop)
 }
 
@@ -653,5 +654,6 @@ func exportChaindata(ctx *cli.Context) error {
 		close(stop)
 	}()
 	db := utils.MakeChainDatabase(ctx, stack, true)
+	defer db.Close()
 	return utils.ExportChaindata(ctx.Args().Get(1), kind, exporter(db), stop)
 }

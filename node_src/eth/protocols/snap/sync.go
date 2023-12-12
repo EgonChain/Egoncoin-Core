@@ -350,6 +350,34 @@ type syncProgress struct {
 	BytecodeHealNops   uint64             // Number of bytecodes not requested
 }
 
+// syncProgress is a database entry to allow suspending and resuming a snapshot state
+// sync. Opposed to full and fast sync, there is no way to restart a suspended
+// snap sync without prior knowledge of the suspension point.
+type SyncProgress struct {
+	Tasks []*accountTask // The suspended account tasks (contract tasks within)
+
+	// Status report during syncing phase
+	AccountSynced  uint64             // Number of accounts downloaded
+	AccountBytes   common.StorageSize // Number of account trie bytes persisted to disk
+	BytecodeSynced uint64             // Number of bytecodes downloaded
+	BytecodeBytes  common.StorageSize // Number of bytecode bytes downloaded
+	StorageSynced  uint64             // Number of storage slots downloaded
+	StorageBytes   common.StorageSize // Number of storage trie bytes persisted to disk
+
+	// Status report during healing phase
+	TrienodeHealSynced uint64             // Number of state trie nodes downloaded
+	TrienodeHealBytes  common.StorageSize // Number of state trie bytes persisted to disk
+	BytecodeHealSynced uint64             // Number of bytecodes downloaded
+	BytecodeHealBytes  common.StorageSize // Number of bytecodes persisted to disk
+}
+
+// SyncPending is analogous to SyncProgress, but it's used to report on pending
+// ephemeral sync progress that doesn't get persisted into the database.
+type SyncPending struct {
+	TrienodeHeal uint64 // Number of state trie nodes pending
+	BytecodeHeal uint64 // Number of bytecodes pending
+}
+
 // SyncPeer abstracts out the methods required for a peer to be synced against
 // with the goal of allowing the construction of mock peers without the full
 // blown networking.
@@ -419,6 +447,8 @@ type Syncer struct {
 	storageSynced  uint64             // Number of storage slots downloaded
 	storageBytes   common.StorageSize // Number of storage trie bytes persisted to disk
 
+	extProgress *SyncProgress // progress that can be exposed to external caller.
+
 	// Request tracking during healing phase
 	trienodeHealIdlers map[string]struct{} // Peers that aren't serving trie node requests
 	bytecodeHealIdlers map[string]struct{} // Peers that aren't serving bytecode requests
@@ -474,6 +504,8 @@ func NewSyncer(db ethdb.KeyValueStore) *Syncer {
 		trienodeHealReqs: make(map[uint64]*trienodeHealRequest),
 		bytecodeHealReqs: make(map[uint64]*bytecodeHealRequest),
 		stateWriter:      db.NewBatch(),
+
+		extProgress: new(SyncProgress),
 	}
 }
 
@@ -630,6 +662,23 @@ func (s *Syncer) Sync(root common.Hash, cancel chan struct{}) error {
 			s.assignTrienodeHealTasks(trienodeHealResps, trienodeHealReqFails, cancel)
 			s.assignBytecodeHealTasks(bytecodeHealResps, bytecodeHealReqFails, cancel)
 		}
+
+		// Update sync progress
+		s.lock.Lock()
+		s.extProgress = &SyncProgress{
+			AccountSynced:      s.accountSynced,
+			AccountBytes:       s.accountBytes,
+			BytecodeSynced:     s.bytecodeSynced,
+			BytecodeBytes:      s.bytecodeBytes,
+			StorageSynced:      s.storageSynced,
+			StorageBytes:       s.storageBytes,
+			TrienodeHealSynced: s.trienodeHealSynced,
+			TrienodeHealBytes:  s.trienodeHealBytes,
+			BytecodeHealSynced: s.bytecodeHealSynced,
+			BytecodeHealBytes:  s.bytecodeHealBytes,
+		}
+		s.lock.Unlock()
+
 		// Wait for something to happen
 		select {
 		case <-s.update:
@@ -702,6 +751,8 @@ func (s *Syncer) loadSyncStatus() {
 					}
 				}
 			}
+			s.lock.Lock()
+			defer s.lock.Unlock()
 			s.snapped = len(s.tasks) == 0
 
 			s.accountSynced = progress.AccountSynced
@@ -739,7 +790,7 @@ func (s *Syncer) loadSyncStatus() {
 		last := common.BigToHash(new(big.Int).Add(next.Big(), step))
 		if i == accountConcurrency-1 {
 			// Make sure we don't overflow if the step is not a proper divisor
-			last = common.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+			last = common.MaxHash
 		}
 		batch := ethdb.HookedBatch{
 			Batch: s.db.NewBatch(),
@@ -793,6 +844,17 @@ func (s *Syncer) saveSyncStatus() {
 		panic(err) // This can only fail during implementation
 	}
 	rawdb.WriteSnapshotSyncStatus(s.db, status)
+}
+
+func (s *Syncer) Progress() (*SyncProgress, *SyncPending) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	pending := new(SyncPending)
+	if s.healer != nil {
+		pending.TrienodeHeal = uint64(len(s.healer.trieTasks))
+		pending.BytecodeHeal = uint64(len(s.healer.codeTasks))
+	}
+	return s.extProgress, pending
 }
 
 // cleanAccountTasks removes account range retrieval tasks that have already been
@@ -2477,7 +2539,7 @@ func (s *Syncer) OnStorage(peer SyncPeer, id uint64, hashes [][]common.Hash, slo
 	// the requested data. For storage range queries that means the state being
 	// retrieved was either already pruned remotely, or the peer is not yet
 	// synced to our head.
-	if len(hashes) == 0 {
+	if len(hashes) == 0 && len(proof) == 0 {
 		logger.Debug("Peer rejected storage request")
 		s.statelessPeers[peer.ID()] = struct{}{}
 		s.lock.Unlock()
@@ -2488,6 +2550,14 @@ func (s *Syncer) OnStorage(peer SyncPeer, id uint64, hashes [][]common.Hash, slo
 
 	// Reconstruct the partial tries from the response and verify them
 	var cont bool
+
+	// If a proof was attached while the response is empty, it indicates that the
+	// requested range specified with 'origin' is empty. Construct an empty state
+	// response locally to finalize the range.
+	if len(hashes) == 0 && len(proof) > 0 {
+		hashes = append(hashes, []common.Hash{})
+		slots = append(slots, [][]byte{})
+	}
 
 	for i := 0; i < len(hashes); i++ {
 		// Convert the keys and proofs into an internal format

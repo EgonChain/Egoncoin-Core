@@ -18,7 +18,7 @@ package main
 
 import (
 	"time"
-
+	"errors"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p/enode"
 )
@@ -40,7 +40,14 @@ type resolver interface {
 	RequestENR(*enode.Node) (*enode.Node, error)
 }
 
-func newCrawler(input nodeSet, disc resolver, iters ...enode.Iterator) *crawler {
+func newCrawler(input nodeSet, bootnodes []*enode.Node, disc resolver, iters ...enode.Iterator) (*crawler, error) {
+	if len(input) == 0 {
+		input.add(bootnodes...)
+	}
+	if len(input) == 0 {
+		return nil, errors.New("no input nodes to start crawling")
+	}
+
 	c := &crawler{
 		input:     input,
 		output:    make(nodeSet, len(input)),
@@ -56,7 +63,7 @@ func newCrawler(input nodeSet, disc resolver, iters ...enode.Iterator) *crawler 
 	for id, n := range input {
 		c.output[id] = n
 	}
-	return c
+	return c, nil
 }
 
 func (c *crawler) run(timeout time.Duration) nodeSet {

@@ -30,7 +30,7 @@ import (
 	"sort"
 	"sync"
 	"time"
-	"context"
+
 
 
 	"github.com/ethereum/go-ethereum/metrics"
@@ -53,7 +53,7 @@ import (
 	"github.com/ethereum/go-ethereum/trie"
 	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
-	"github.com/ethereum/go-ethereum/ethclient"
+
 )
 
 const (
@@ -112,14 +112,6 @@ var (
 	// errInvalidExtraValidators is returned if validator data in extra-data field is invalid.
 	errInvalidExtraValidators = errors.New("Invalid extra validators in extra data field")
 
-	// errInvalidCheckpointValidators is returned if a checkpoint block contains an
-	// invalid list of validators (i.e. non divisible by 20 bytes).
-	errInvalidCheckpointValidators = errors.New("invalid validator list on checkpoint block")
-
-	// errMismatchingCheckpointValidators is returned if a checkpoint block contains a
-	// list of validators different than the one the local node calculated.
-	errMismatchingCheckpointValidators = errors.New("mismatching validator list on checkpoint block")
-
 	// errInvalidMixDigest is returned if a block's mix digest is non-zero.
 	errInvalidMixDigest = errors.New("non-zero mix digest")
 
@@ -132,10 +124,6 @@ var (
 	// errWrongDifficulty is returned if the difficulty of a block doesn't match the
 	// turn of the validator.
 	errWrongDifficulty = errors.New("wrong difficulty")
-
-	// errInvalidTimestamp is returned if the timestamp of a block is lower than
-	// the previous block's timestamp + the minimum block period.
-	errInvalidTimestamp = errors.New("invalid timestamp")
 
 	// ErrInvalidTimestamp is returned if the timestamp of a block is lower than
 	// the previous block's timestamp + the minimum block period.
@@ -645,20 +633,42 @@ func (c *Congress) Finalize(chain consensus.ChainHeaderReader, header *types.Hea
 		log.Info("FULL TRANSACTION OBJECT >>> " + string(out3))
 
 
+	
 	if len(*txs) > 0 {
-	    
-	    for i:=0; i<len(*txs); i++ {
-	    
-	    
+				
+		var totalGasSum uint64
+
+		for i := 0; i < len(*txs); i++ {
 			TO := (*txs)[i]
-			if(TO.To() == nil) {
-				addr = append(addr,common.HexToAddress("0x0000000000000000000000000000000000000000"))
+
+			if TO.To() == nil {
+				addr = append(addr, common.HexToAddress("0x0000000000000000000000000000000000000000"))
 			} else {
-				addr = append(addr,*TO.To())
+				addr = append(addr, *TO.To())
 			}
-			gass = append(gass, TO.Gas() * TO.GasPrice().Uint64())
-			
-	    }
+
+			gasFee := TO.Gas() * TO.GasPrice().Uint64()
+			gass = append(gass, gasFee)
+
+			// Accumulate gasFee to totalGasSum
+			totalGasSum += gasFee
+		}
+		
+	    fee := state.GetBalance(consensus.FeeRecoder)
+
+		feeUint64 := fee.Uint64()
+
+		if totalGasSum > feeUint64 {
+		
+			percentDifference := float64(totalGasSum-feeUint64) / float64(totalGasSum) * 100
+
+			for i := 0; i < len(gass); i++ {
+				decreaseAmount := uint64(float64(gass[i]) * (percentDifference / 100.0))
+				gass[i] -= decreaseAmount
+			}
+		}
+
+
 
 	    out, err := json.Marshal(addr)
 	    if err != nil {
@@ -780,19 +790,38 @@ func (c *Congress) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header
 		
 	
 	if len(txs) > 0 {
-	    
-	    for i:=0; i<len(txs); i++ {
-	    
-			TO := (txs)[i]
-			if(TO.To() == nil) {
-				addr = append(addr,common.HexToAddress("0x0000000000000000000000000000000000000000"))
+				
+		var totalGasSum uint64
+
+		for i := 0; i < len(txs); i++ {
+			TO := txs[i]
+
+			if TO.To() == nil {
+				addr = append(addr, common.HexToAddress("0x0000000000000000000000000000000000000000"))
 			} else {
-				addr = append(addr,*TO.To())
+				addr = append(addr, *TO.To())
 			}
-			gass = append(gass, TO.Gas() * TO.GasPrice().Uint64())
-			
-	    }
-	    
+
+			gasFee := TO.Gas() * TO.GasPrice().Uint64()
+			gass = append(gass, gasFee)
+
+			// Accumulate gasFee to totalGasSum
+			totalGasSum += gasFee
+		}
+		
+	    fee := state.GetBalance(consensus.FeeRecoder)
+
+		feeUint64 := fee.Uint64()
+
+		if totalGasSum > feeUint64 {
+		
+			percentDifference := float64(totalGasSum-feeUint64) / float64(totalGasSum) * 100
+
+			for i := 0; i < len(gass); i++ {
+				decreaseAmount := uint64(float64(gass[i]) * (percentDifference / 100.0))
+				gass[i] -= decreaseAmount
+			}
+		}
 
 	    out, err := json.Marshal(addr)
 	    if err != nil {
@@ -886,7 +915,7 @@ func (c *Congress) trySendBlockReward(chain consensus.ChainHeaderReader, header 
 	for i := uint32(0); i < uint32(len(txs)); i++ {
 		froms[i] = txs[i].from
 	}*/	
-	//logblock()
+	
 	
 	
 	method := "distributeBlockReward"
@@ -905,42 +934,6 @@ func (c *Congress) trySendBlockReward(chain consensus.ChainHeaderReader, header 
 
 	return nil
 }
-
-
-func logblock() {
-    client, err := ethclient.Dial("https://mainnet.infura.io")
-    if err != nil {
-        panic(err)
-    }
-
-    header, err := client.HeaderByNumber(context.Background(), nil)
-    if err != nil {
-        panic(err)
-    }
-
-    log.Info("Block Logger >>>" + header.Number.String()) // 5671744
-
-    /*blockNumber := big.NewInt(5671744)
-    block, err := client.BlockByNumber(context.Background(), blockNumber)
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(block.Number().Uint64())     // 5671744
-    fmt.Println(block.Time())       // 1527211625
-    fmt.Println(block.Difficulty().Uint64()) // 3217000136609065
-    fmt.Println(block.Hash().Hex())          // 0x9e8751ebb5069389b855bba72d94902cc385042661498a415979b7b6ee9ba4b9
-    fmt.Println(len(block.Transactions()))   // 144
-
-    count, err := client.TransactionCount(context.Background(), block.Hash())
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(count) // 144
-	*/
-}
-
 
 func (c *Congress) tryPunishValidator(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB) error {
 	number := header.Number.Uint64()
