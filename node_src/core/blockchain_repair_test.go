@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 // Tests that abnormal program termination (i.e.crash) and restart doesn't leave
 // the database in some strange state with gaps in the chain, nor with block data

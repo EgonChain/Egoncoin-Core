@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 //go:generate go-bindata -nometadata -nocompress -o 4byte.go -pkg fourbyte 4byte.json
 //go:generate gofmt -s -w 4byte.go

@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 package ethapi
 
@@ -768,6 +769,9 @@ func (s *PublicBlockChainAPI) GetProof(ctx context.Context, address common.Addre
 func decodeHash(s string) (common.Hash, error) {
 	if strings.HasPrefix(s, "0x") || strings.HasPrefix(s, "0X") {
 		s = s[2:]
+	}
+	if (len(s) & 1) > 0 {
+		s = "0" + s
 	}
 	b, err := hex.DecodeString(s)
 	if err != nil {

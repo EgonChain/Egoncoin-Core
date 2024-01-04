@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 // noopTracer is just the barebone boilerplate code required from a JavaScript
 // object to be usable as a transaction tracer.

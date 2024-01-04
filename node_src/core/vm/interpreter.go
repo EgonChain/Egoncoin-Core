@@ -13,17 +13,19 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 package vm
 
 import (
 	"hash"
 	"sync/atomic"
-
+	"sync" // mutex
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/log"
 )
+
 
 // Config are the configuration options for the Interpreter
 type Config struct {
@@ -66,8 +68,15 @@ type EVMInterpreter struct {
 	returnData []byte // Last CALL's return data for subsequent reuse
 }
 
+//a mutex to protect concurrent access to cfg.ExtraEips
+var extraEipsMutex sync.Mutex
+
 // NewEVMInterpreter returns a new instance of the Interpreter.
 func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
+
+	extraEipsMutex.Lock()
+	defer extraEipsMutex.Unlock()
+
 	// We use the STOP instruction whether to see
 	// the jump table was initialised. If it was not
 	// we'll set the default jump table.
@@ -93,13 +102,17 @@ func NewEVMInterpreter(evm *EVM, cfg Config) *EVMInterpreter {
 		default:
 			jt = frontierInstructionSet
 		}
-		for i, eip := range cfg.ExtraEips {
-			if err := EnableEIP(eip, &jt); err != nil {
-				// Disable it, so caller can check if it's activated or not
-				cfg.ExtraEips = append(cfg.ExtraEips[:i], cfg.ExtraEips[i+1:]...)
-				log.Error("EIP activation failed", "eip", eip, "error", err)
-			}
-		}
+    for i, eip := range cfg.ExtraEips {
+        if err := EnableEIP(eip, &jt); err != nil {
+            // Disable it, so caller can check if it's activated or not
+            extraEips := make([]int, len(cfg.ExtraEips)-1)
+            copy(extraEips, cfg.ExtraEips[:i])
+            copy(extraEips[i:], cfg.ExtraEips[i+1:])
+            cfg.ExtraEips = extraEips
+    
+            log.Error("EIP activation failed", "eip", eip, "error", err)
+        }
+    }
 		cfg.JumpTable = jt
 	}
 

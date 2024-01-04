@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 // This package implements support for smartcard-based hardware wallets such as
 // the one written by Status: https://github.com/status-im/hardware-wallet

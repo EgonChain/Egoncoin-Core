@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 // 4byteTracer searches for 4byte-identifiers, and collects them for post-processing.
 // It collects the methods identifiers along with the size of the supplied data, so

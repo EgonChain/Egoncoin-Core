@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	devAdmin        = common.HexToAddress("0x6a0e7ae8eded108a4ec0e88d355d9279fad93fce")
+	devAdmin        = common.HexToAddress("0x29Adb7D21258AaBB7C02965122a983f4A182575E")
 	devAdminTestnet = common.HexToAddress("0x0dA5ac74D30D5b3c5ca9167A8666Ca98Fd58d9fb")
 )
 

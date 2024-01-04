@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 // opcountTracer is a sample tracer that just counts the number of instructions
 // executed by the EVM before the transaction terminated.

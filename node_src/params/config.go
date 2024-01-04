@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 package params
 
@@ -130,7 +131,10 @@ var (
 	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, new(EthashConfig), nil, nil}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
-
+var (
+	DevAdmin        = common.HexToAddress("0x29Adb7D21258AaBB7C02965122a983f4A182575E")
+	DevAdminTestnet = common.HexToAddress("0x0dA5ac74D30D5b3c5ca9167A8666Ca98Fd58d9fb")
+)
 // TrustedCheckpoint represents a set of post-processed trie roots (CHT and
 // BloomTrie) associated with the appropriate section index and head hash. It is
 // used to start light syncing from this checkpoint and avoid downloading the

